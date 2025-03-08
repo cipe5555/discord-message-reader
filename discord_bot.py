@@ -9,7 +9,7 @@ import asyncio
 # Load environment variables
 load_dotenv()
 API_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-APP_URL = os.getenv("APP_URL")  # Set this in your environment variables (Render URL)
+APP_URL = os.getenv("https://discord-message-reader.onrender.com")  # Set this in your environment variables (Render URL)
 
 # Setup FastAPI
 app = FastAPI()
