@@ -71,7 +71,7 @@ async def keep_alive():
                 print("Pinged the server to keep it awake.")
             except requests.RequestException as e:
                 print(f"Keep-alive request failed: {e}")
-        await asyncio.sleep(14 * 60)  # Wait 14 minutes
+        await asyncio.sleep(1 * 60)  # Wait 14 minutes
 
 async def main():
     # Start FastAPI server in background
