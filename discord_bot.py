@@ -1,5 +1,6 @@
 import discord
 import os
+import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
@@ -8,6 +9,7 @@ import asyncio
 # Load environment variables
 load_dotenv()
 API_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+APP_URL = os.getenv("APP_URL")  # Set this in your environment variables (Render URL)
 
 # Setup FastAPI
 app = FastAPI()
@@ -27,7 +29,7 @@ async def read_messages(thread_id: int):
     if not channel:
         return {"error": "Thread not found"}
 
-    messages = [msg async for msg in channel.history(limit=None)]  # Get latest 10 messages
+    messages = [msg async for msg in channel.history(limit=None)]  # Get latest messages
 
     message_data = []
     for msg in messages:
@@ -44,7 +46,7 @@ async def read_messages(thread_id: int):
             "username": author.name,
             "nickname": user_nickname,
             "content": text_content,
-            "image_urls": image_urls,  # List of image URLs (empty if no images)
+            "image_urls": image_urls,
             "timestamp": msg.created_at.isoformat(),
         })
 
@@ -60,9 +62,22 @@ async def run_fastapi():
     server = uvicorn.Server(config)
     await server.serve()
 
+# Keep-alive function to prevent the server from sleeping
+async def keep_alive():
+    while True:
+        if APP_URL:
+            try:
+                requests.get(APP_URL)  # Ping your Render app
+                print("Pinged the server to keep it awake.")
+            except requests.RequestException as e:
+                print(f"Keep-alive request failed: {e}")
+        await asyncio.sleep(14 * 60)  # Wait 14 minutes
+
 async def main():
     # Start FastAPI server in background
-    loop.create_task(run_fastapi())
+    asyncio.create_task(run_fastapi())
+    # Start keep-alive task
+    asyncio.create_task(keep_alive())
     # Start Discord bot
     await client.start(API_TOKEN)
 
