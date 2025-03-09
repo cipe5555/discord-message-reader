@@ -9,7 +9,7 @@ import asyncio
 # Load environment variables
 load_dotenv()
 API_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-APP_URL = os.getenv("https://discord-message-reader.onrender.com")  # Set this in your environment variables (Render URL)
+APP_URL = os.getenv("APP_URL")  # Ensure APP_URL is set in .env
 
 # Setup FastAPI
 app = FastAPI()
@@ -22,6 +22,10 @@ intents.members = True  # Required to fetch nickname
 intents.messages = True
 
 client = discord.Client(intents=intents)
+
+@app.get("/healthz")
+async def health_check():
+    return {"status": "ok"}
 
 @app.get("/read_messages/{thread_id}")
 async def read_messages(thread_id: int):
@@ -62,16 +66,18 @@ async def run_fastapi():
     server = uvicorn.Server(config)
     await server.serve()
 
-# Keep-alive function to prevent the server from sleeping
 async def keep_alive():
     while True:
         if APP_URL:
             try:
-                requests.get(APP_URL)  # Ping your Render app
-                print("Pinged the server to keep it awake.")
+                response = requests.get(f"{APP_URL}/healthz", timeout=10)
+                print(f"Pinged {APP_URL}/healthz, Status Code: {response.status_code}")
             except requests.RequestException as e:
                 print(f"Keep-alive request failed: {e}")
-        await asyncio.sleep(1 * 60)  # Wait 14 minutes
+        else:
+            print("APP_URL is not set! Keep-alive function won't work.")
+        await asyncio.sleep(1 * 60)  # Wait 1 minute
+
 
 async def main():
     # Start FastAPI server in background
