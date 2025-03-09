@@ -38,12 +38,15 @@ async def read_messages(thread_id: int):
     message_data = []
     for msg in messages:
         author = msg.author
-        user_nickname = msg.guild.get_member(author.id).nick if msg.guild else None
+        user_nickname = None
+        if msg.guild:
+            try:
+                member = await msg.guild.fetch_member(author.id)
+                user_nickname = member.nick
+            except discord.NotFound:
+                user_nickname = None  # Handle cases where the user is not found
 
-        # Check if message contains text
         text_content = msg.content if msg.content else None
-        
-        # Check if message contains an image
         image_urls = [attachment.url for attachment in msg.attachments if attachment.url]
 
         message_data.append({
@@ -55,6 +58,7 @@ async def read_messages(thread_id: int):
         })
 
     return {"messages": message_data}
+
 
 @client.event
 async def on_ready():
