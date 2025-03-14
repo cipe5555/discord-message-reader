@@ -69,7 +69,8 @@ async def on_ready():
 @client.event
 async def on_thread_create(thread):
     """Detects new forum posts and sends a notification"""
-    if thread.parent and thread.parent.id == FORUM_LINK:
+    if thread.parent and thread.parent.type == discord.ChannelType.forum and str(thread.parent_id) == FORUM_LINK:
+        print(f"parent_id: {thread.parent_id}")
         print(f"📢 New forum post detected: {thread.name}")
         try:
             now_utc = datetime.now(timezone.utc)
@@ -81,6 +82,11 @@ async def on_thread_create(thread):
             print("Regear Calculated Successfully!")
         except Exception as e:
                 print(f"error: {e}")
+        # notify_channel = client.get_channel(NOTIFY_CHANNEL_ID)
+        # if notify_channel:
+        #     await notify_channel.send(
+        #         f"📢 **New Forum Post:** {thread.name}\n🔗 {thread.jump_url}"
+        #     )
 
 # Function to run FastAPI and Discord bot together
 async def run_fastapi():
