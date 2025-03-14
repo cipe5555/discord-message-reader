@@ -1,5 +1,8 @@
 discord.py==2.5.2
 fastapi==0.115.11
+gspread==3.6.0
+protobuf==3.20.3
 python-dotenv==1.0.1
+python_dateutil==2.8.2
 Requests==2.32.3
 uvicorn==0.34.0

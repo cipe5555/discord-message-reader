@@ -12,7 +12,7 @@ from src.regear import RegearAgent
 load_dotenv()
 API_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 APP_URL = os.getenv("APP_URL")  # Ensure APP_URL is set in .env
-NOTIFY_CHANNEL_ID = int(os.getenv("NOTIFY_CHANNEL_ID", "0"))  # Channel to notify on new forum posts
+FORUM_LINK = os.getenv("FORUM_LINK")
 
 regear_agent = RegearAgent()
 
@@ -69,7 +69,7 @@ async def on_ready():
 @client.event
 async def on_thread_create(thread):
     """Detects new forum posts and sends a notification"""
-    if thread.parent and thread.parent.type == discord.ChannelType.forum:
+    if thread.parent and thread.parent.id == FORUM_LINK:
         print(f"📢 New forum post detected: {thread.name}")
         try:
             now_utc = datetime.now(timezone.utc)
@@ -81,11 +81,6 @@ async def on_thread_create(thread):
             print("Regear Calculated Successfully!")
         except Exception as e:
                 print(f"error: {e}")
-        # notify_channel = client.get_channel(NOTIFY_CHANNEL_ID)
-        # if notify_channel:
-        #     await notify_channel.send(
-        #         f"📢 **New Forum Post:** {thread.name}\n🔗 {thread.jump_url}"
-        #     )
 
 # Function to run FastAPI and Discord bot together
 async def run_fastapi():
