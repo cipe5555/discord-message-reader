@@ -39,7 +39,7 @@ async def read_messages(thread_id: int):
     if not channel:
         return {"error": "Thread not found"}
 
-    messages = [msg async for msg in channel.history(limit=50)]  # Get last 50 messages
+    messages = [msg async for msg in channel.history(limit=None)]  # Get all messages
 
     message_data = []
     for msg in messages:
@@ -70,12 +70,11 @@ async def on_ready():
 async def on_thread_create(thread):
     """Detects new forum posts and sends a notification"""
     if thread.parent and thread.parent.type == discord.ChannelType.forum and str(thread.parent_id) == FORUM_LINK:
-        print(f"parent_id: {thread.parent_id}")
         print(f"📢 New forum post detected: {thread.name}")
         try:
             now_utc = datetime.now(timezone.utc)
             end_datetime = now_utc.replace(tzinfo=None)  # Convert to naive datetime
-            start_datetime = (now_utc - timedelta(hours=2)).replace(tzinfo=None)  # Convert to naive datetime
+            start_datetime = (now_utc - timedelta(hours=4)).replace(tzinfo=None)  # Convert to naive datetime
             print(f"end_datetime: {end_datetime}")
             print(f"start_datetime: {start_datetime}")
             regear_agent.regear(start_datetime, end_datetime, thread.name)

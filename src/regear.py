@@ -134,7 +134,29 @@ class RegearAgent:
 
         statistics_sheet.clear()
         statistics_sheet.append_row(["Item Name", "Count"])
-        sorted_statistics_data = sorted(item_counts.items())
+
+        combined_counts = defaultdict(int)
+
+        for item_name, count in item_counts.items():
+            if any(q in item_name for q in ["無", "鉄"]):  # Skip filtered items
+                continue
+
+            # Extract base name and tier level
+            match = re.match(r"(.+?)(T\d+)(\.\d+)?", item_name)  # Extract base name, tier, and enchantment
+            if match:
+                base_name, tier, enchantment = match.groups()
+                tier_number = int(tier[1:])  # Extract numeric tier (e.g., "5" from "T5")
+                enchantment_number = int(enchantment[1:]) if enchantment else 0  # Default to 0 if no enchantment
+                flat_level = tier_number + enchantment_number  # Calculate flat level
+                base_name = f"{base_name}平{flat_level}"  # Convert to new format
+            else:
+                base_name = re.sub(r" - .*", "", item_name)  # Remove quality suffix if no tier
+
+            combined_counts[base_name] += count  # Combine counts
+
+        # Convert to sorted list and write in batch
+        sorted_statistics_data = sorted(combined_counts.items())  # Sort by item name
+
         if sorted_statistics_data:
             statistics_sheet.append_rows(sorted_statistics_data)
         print("Statistics updated successfully!")
