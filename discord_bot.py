@@ -74,7 +74,7 @@ async def on_thread_create(thread):
         try:
             now_utc = datetime.now(timezone.utc)
             end_datetime = now_utc.replace(tzinfo=None)  # Convert to naive datetime
-            start_datetime = (now_utc - timedelta(hours=4)).replace(tzinfo=None)  # Convert to naive datetime
+            start_datetime = (now_utc - timedelta(hours=2)).replace(tzinfo=None)  # Convert to naive datetime
             print(f"end_datetime: {end_datetime}")
             print(f"start_datetime: {start_datetime}")
             regear_agent.regear(start_datetime, end_datetime, thread.name)
