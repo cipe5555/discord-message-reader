@@ -34,24 +34,29 @@ async def health_check():
 
 @app.get("/read_messages/{thread_id}")
 async def read_messages(thread_id: int):
+    """Fetch messages from a forum thread"""
     channel = client.get_channel(thread_id)
     if not channel:
         return {"error": "Thread not found"}
 
-    # Limit this to a reasonable number, e.g., 200, or paginate it
-    messages = [msg async for msg in channel.history(limit=200)] 
+    messages = [msg async for msg in channel.history(limit=None)]  # Get all messages
 
     message_data = []
     for msg in messages:
         author = msg.author
-        # Try cache first (no API call)
-        member = msg.guild.get_member(author.id) if msg.guild else None
-        
+        user_nickname = None
+        if msg.guild:
+            try:
+                member = await msg.guild.fetch_member(author.id)
+                user_nickname = member.nick
+            except discord.NotFound:
+                user_nickname = None  # Handle cases where the user is not found
+
         message_data.append({
             "username": author.name,
-            "nickname": member.nick if member else None, # nickname from cache
-            "content": msg.content or None,
-            "image_urls": [att.url for att in msg.attachments],
+            "nickname": user_nickname,
+            "content": msg.content if msg.content else None,
+            "image_urls": [attachment.url for attachment in msg.attachments if attachment.url],
             "timestamp": msg.created_at.isoformat(),
         })
 
